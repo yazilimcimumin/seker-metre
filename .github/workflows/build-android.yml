@@ -25,19 +25,16 @@ jobs:
           java-version: '17'
 
       - name: 📦 Install dependencies
-        working-directory: SekerMetre
         run: npm ci
 
       - name: 🔨 Setup Expo
-        working-directory: SekerMetre
         run: npm install -g expo-cli eas-cli
 
       - name: 🏗️ Prebuild Android
-        working-directory: SekerMetre
         run: npx expo prebuild --platform android --clean
 
       - name: 🎯 Build Android APK
-        working-directory: SekerMetre/android
+        working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
@@ -46,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: seker-metre-release
-          path: SekerMetre/android/app/build/outputs/apk/release/app-release.apk
+          path: android/app/build/outputs/apk/release/app-release.apk
           
       - name: 🎉 Build Success
         run: echo "✅ APK başarıyla oluşturuldu!"
