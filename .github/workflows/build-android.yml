@@ -16,9 +16,7 @@ jobs:
       - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'SekerMetre/package-lock.json'
+          node-version: '24'
 
       - name: ☕ Setup Java
         uses: actions/setup-java@v4
@@ -27,23 +25,20 @@ jobs:
           java-version: '17'
 
       - name: 📦 Install dependencies
-        run: |
-          cd SekerMetre
-          npm install
+        working-directory: SekerMetre
+        run: npm ci
 
       - name: 🔨 Setup Expo
-        run: |
-          cd SekerMetre
-          npm install -g expo-cli eas-cli
+        working-directory: SekerMetre
+        run: npm install -g expo-cli eas-cli
 
       - name: 🏗️ Prebuild Android
-        run: |
-          cd SekerMetre
-          npx expo prebuild --platform android --clean
+        working-directory: SekerMetre
+        run: npx expo prebuild --platform android --clean
 
       - name: 🎯 Build Android APK
+        working-directory: SekerMetre/android
         run: |
-          cd SekerMetre/android
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
           
