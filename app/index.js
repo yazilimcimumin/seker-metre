@@ -80,10 +80,16 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={category.id}
               style={[styles.categoryCard, { backgroundColor: category.color }]}
-              onPress={() => router.push({
-                pathname: '/category',
-                params: { categoryId: category.id }
-              })}
+              onPress={() => {
+                if (category.route) {
+                  router.push(category.route);
+                } else {
+                  router.push({
+                    pathname: '/category',
+                    params: { categoryId: category.id }
+                  });
+                }
+              }}
               activeOpacity={0.7}
             >
               <Text style={styles.categoryIcon}>{category.icon}</Text>

@@ -277,5 +277,6 @@ export const categories = [
   { id: 'meyve', name: 'Meyveler', icon: '🍎', color: '#E8F5E9' },
   { id: 'sebze', name: 'Sebzeler', icon: '🥦', color: '#E3F2FD' },
   { id: 'icecek', name: 'İçecekler', icon: '☕', color: '#FFF3E0' },
-  { id: 'yemek', name: 'Yemekler', icon: '🍲', color: '#F3E5F5' }
+  { id: 'yemek', name: 'Yemekler', icon: '🍲', color: '#F3E5F5' },
+  { id: 'tracking', name: 'Şeker Takibi', icon: '📊', color: '#FFE0F0', route: 'sugar-tracking' }
 ];
