@@ -130,24 +130,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
   },
   categoryHeader: {
-    paddingVertical: 25,
+    paddingVertical: 15,
     paddingHorizontal: 20,
     alignItems: 'center',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
   },
   categoryIcon: {
-    fontSize: 50,
-    marginBottom: 10,
+    fontSize: 36,
+    marginBottom: 6,
   },
   categoryTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 5,
+    marginBottom: 4,
   },
   itemCount: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#666',
   },
   content: {
