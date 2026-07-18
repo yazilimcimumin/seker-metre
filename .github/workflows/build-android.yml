@@ -1,0 +1,56 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: ☕ Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 📦 Install dependencies
+        run: |
+          cd SekerMetre
+          npm install
+
+      - name: 🔨 Setup Expo
+        run: |
+          cd SekerMetre
+          npm install -g expo-cli eas-cli
+
+      - name: 🏗️ Prebuild Android
+        run: |
+          cd SekerMetre
+          npx expo prebuild --platform android --clean
+
+      - name: 🎯 Build Android APK
+        run: |
+          cd SekerMetre/android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          
+      - name: 📤 Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: seker-metre-release
+          path: SekerMetre/android/app/build/outputs/apk/release/app-release.apk
+          
+      - name: 🎉 Build Success
+        run: echo "✅ APK başarıyla oluşturuldu!"

@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Şeker Metre",
+    "slug": "seker-metre",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.svg",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.svg",
+      "resizeMode": "contain",
+      "backgroundColor": "#E8F5E9"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sekermetre.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.svg",
+        "backgroundColor": "#E8F5E9"
+      },
+      "package": "com.sekermetre.app",
+      "permissions": []
+    },
+    "web": {
+      "favicon": "./assets/favicon.svg"
+    },
+    "plugins": []
+  }
+}
