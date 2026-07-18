@@ -10,8 +10,16 @@ export default function Layout() {
         headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
+          fontSize: 20,
         },
       }}
-    />
+    >
+      <Stack.Screen 
+        name="index" 
+        options={{ 
+          title: 'Şeker Metre - Ana Sayfa'
+        }} 
+      />
+    </Stack>
   );
 }

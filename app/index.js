@@ -62,20 +62,19 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#4CAF50" />
-      
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={handleLogoPress} activeOpacity={0.8}>
-          <Animated.Text style={[styles.logo, { transform: [{ scale: scaleAnim }] }]}>
-            🩺
-          </Animated.Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>Şeker Metre</Text>
-        <Text style={styles.subtitle}>Diyabet Dostu Gıda Rehberi</Text>
-      </View>
 
       {/* Kategoriler */}
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        {/* Gizli Admin Erişimi - Bilgi kartına 5 kez tıkla */}
+        <TouchableOpacity 
+          style={styles.adminHintCard}
+          onPress={handleLogoPress}
+          activeOpacity={0.9}
+        >
+          <Text style={styles.adminHintIcon}>🩺</Text>
+          <Text style={styles.adminHintText}>Diyabet Dostu Gıda Rehberi</Text>
+        </TouchableOpacity>
+
         <View style={styles.categoriesContainer}>
           {categories.map((category) => (
             <TouchableOpacity
@@ -138,37 +137,30 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FAFAFA',
   },
-  header: {
-    backgroundColor: '#4CAF50',
-    paddingTop: 50,
-    paddingBottom: 20,
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  logo: {
-    fontSize: 40,
-    marginBottom: 8,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#E8F5E9',
-  },
   content: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  adminHintCard: {
+    backgroundColor: '#E8F5E9',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 10,
+    marginTop: 15,
+    marginBottom: 5,
+    borderWidth: 1,
+    borderColor: '#4CAF50',
+  },
+  adminHintIcon: {
+    fontSize: 24,
+    marginRight: 10,
+  },
+  adminHintText: {
+    fontSize: 14,
+    color: '#2E7D32',
+    fontWeight: '600',
   },
   categoriesContainer: {
     marginTop: 20,
