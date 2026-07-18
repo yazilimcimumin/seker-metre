@@ -11,17 +11,17 @@ jobs:
     
     steps:
       - name: 📥 Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🔧 Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: 'SekerMetre/package-lock.json'
 
       - name: ☕ Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
@@ -48,7 +48,7 @@ jobs:
           ./gradlew assembleRelease --no-daemon
           
       - name: 📤 Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: seker-metre-release
           path: SekerMetre/android/app/build/outputs/apk/release/app-release.apk
