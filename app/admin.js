@@ -19,6 +19,9 @@ const STORAGE_KEY = '@seker_metre_custom_foods';
 
 export default function AdminScreen() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState('add'); // 'add' veya 'list'
+  const [foods, setFoods] = useState([]);
+  const [editingFood, setEditingFood] = useState(null);
   const [formData, setFormData] = useState({
     id: '',
     kategori: 'meyve',
@@ -35,6 +38,58 @@ export default function AdminScreen() {
 
   const updateField = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Ürünleri yükle
+  useEffect(() => {
+    loadFoods();
+  }, []);
+
+  const loadFoods = async () => {
+    const customFoods = await AsyncStorage.getItem(STORAGE_KEY);
+    if (customFoods) {
+      setFoods(JSON.parse(customFoods));
+    }
+  };
+
+  // Düzenleme için formu doldur
+  const startEdit = (food) => {
+    setEditingFood(food.id);
+    setFormData({
+      id: food.id,
+      kategori: food.kategori,
+      isim: food.isim,
+      seker_orani: food.seker_orani,
+      porsiyon: food.porsiyon,
+      glisemik_indeks: food.glisemik_indeks.toString(),
+      glisemik_seviye: food.glisemik_seviye,
+      durum: food.durum,
+      durum_text: food.durum_text,
+      aciklama: food.aciklama,
+      oneriler: food.oneriler.join('\n'),
+    });
+    setActiveTab('add');
+  };
+
+  // Silme
+  const deleteFood = async (id) => {
+    Alert.alert(
+      'Ürünü Sil',
+      'Bu ürünü silmek istediğinize emin misiniz?',
+      [
+        { text: 'İptal', style: 'cancel' },
+        {
+          text: 'Sil',
+          style: 'destructive',
+          onPress: async () => {
+            const updatedFoods = foods.filter(f => f.id !== id);
+            await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedFoods));
+            setFoods(updatedFoods);
+            Alert.alert('Başarılı', 'Ürün silindi');
+          }
+        }
+      ]
+    );
   };
 
   const generateId = (isim) => {
@@ -73,17 +128,14 @@ export default function AdminScreen() {
     if (!validateForm()) return;
 
     try {
-      // ID otomatik oluştur
-      const id = generateId(formData.isim);
-      
-      // Önerileri array'e çevir (satır satır)
+      // Önerileri array'e çevir
       const onerilerArray = formData.oneriler
         .split('\n')
         .filter(line => line.trim() !== '');
 
-      const newFood = {
+      const foodData = {
         ...formData,
-        id,
+        id: editingFood || generateId(formData.isim),
         glisemik_indeks: parseInt(formData.glisemik_indeks),
         oneriler: onerilerArray,
         renk: '#E3F2FD',
@@ -91,15 +143,22 @@ export default function AdminScreen() {
 
       // Mevcut custom gıdaları al
       const existingData = await AsyncStorage.getItem(STORAGE_KEY);
-      const existingFoods = existingData ? JSON.parse(existingData) : [];
+      let existingFoods = existingData ? JSON.parse(existingData) : [];
 
-      // Yeni gıdayı ekle
-      existingFoods.push(newFood);
+      if (editingFood) {
+        // Güncelleme
+        existingFoods = existingFoods.map(f => f.id === editingFood ? foodData : f);
+      } else {
+        // Yeni ekleme
+        existingFoods.push(foodData);
+      }
+
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(existingFoods));
+      setFoods(existingFoods);
 
       Alert.alert(
         'Başarılı',
-        'Gıda başarıyla eklendi!',
+        editingFood ? 'Gıda güncellendi!' : 'Gıda eklendi!',
         [
           {
             text: 'Tamam',
@@ -118,6 +177,8 @@ export default function AdminScreen() {
                 aciklama: '',
                 oneriler: '',
               });
+              setEditingFood(null);
+              setActiveTab('list');
             }
           }
         ]
@@ -153,9 +214,34 @@ export default function AdminScreen() {
             </Text>
           </View>
 
-          {/* Form */}
+          {/* Tab Seçici */}
+          <View style={styles.tabContainer}>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'add' && styles.tabActive]}
+              onPress={() => setActiveTab('add')}
+            >
+              <Text style={[styles.tabText, activeTab === 'add' && styles.tabTextActive]}>
+                {editingFood ? '✏️ Düzenle' : '➕ Yeni Ekle'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.tab, activeTab === 'list' && styles.tabActive]}
+              onPress={() => {
+                setActiveTab('list');
+                setEditingFood(null);
+                loadFoods();
+              }}
+            >
+              <Text style={[styles.tabText, activeTab === 'list' && styles.tabTextActive]}>
+                📋 Ürünler ({foods.length})
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Form veya Liste */}
+          {activeTab === 'add' ? (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Yeni Gıda Ekle</Text>
+            <Text style={styles.cardTitle}>{editingFood ? 'Gıdayı Düzenle' : 'Yeni Gıda Ekle'}</Text>
 
             {/* Kategori Seçimi */}
             <Text style={styles.label}>Kategori *</Text>
@@ -301,9 +387,82 @@ export default function AdminScreen() {
 
             {/* Kaydet Butonu */}
             <TouchableOpacity style={styles.saveButton} onPress={saveFood}>
-              <Text style={styles.saveButtonText}>💾 Gıdayı Kaydet</Text>
+              <Text style={styles.saveButtonText}>
+                {editingFood ? '✏️ Güncelle' : '💾 Gıdayı Kaydet'}
+              </Text>
             </TouchableOpacity>
+
+            {editingFood && (
+              <TouchableOpacity 
+                style={styles.cancelButton} 
+                onPress={() => {
+                  setEditingFood(null);
+                  setFormData({
+                    id: '',
+                    kategori: 'meyve',
+                    isim: '',
+                    seker_orani: '',
+                    porsiyon: '',
+                    glisemik_indeks: '',
+                    glisemik_seviye: 'Düşük',
+                    durum: 'uygun',
+                    durum_text: 'Uygundur',
+                    aciklama: '',
+                    oneriler: '',
+                  });
+                  setActiveTab('list');
+                }}
+              >
+                <Text style={styles.cancelButtonText}>❌ İptal</Text>
+              </TouchableOpacity>
+            )}
           </View>
+          ) : (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Eklenmiş Gıdalar ({foods.length})</Text>
+            
+            {foods.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>Henüz ürün eklenmemiş</Text>
+                <TouchableOpacity
+                  style={styles.addFirstButton}
+                  onPress={() => setActiveTab('add')}
+                >
+                  <Text style={styles.addFirstButtonText}>➕ İlk Ürünü Ekle</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              foods.map((food) => (
+                <View key={food.id} style={styles.foodItem}>
+                  <View style={styles.foodItemHeader}>
+                    <Text style={styles.foodItemName}>{food.isim}</Text>
+                    <Text style={styles.foodItemCategory}>
+                      {categories.find(c => c.id === food.kategori)?.icon} {categories.find(c => c.id === food.kategori)?.name}
+                    </Text>
+                  </View>
+                  <View style={styles.foodItemDetails}>
+                    <Text style={styles.foodItemDetail}>🍬 {food.seker_orani}</Text>
+                    <Text style={styles.foodItemDetail}>📊 GI: {food.glisemik_indeks}</Text>
+                  </View>
+                  <View style={styles.foodItemActions}>
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      onPress={() => startEdit(food)}
+                    >
+                      <Text style={styles.editButtonText}>✏️ Düzenle</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => deleteFood(food.id)}
+                    >
+                      <Text style={styles.deleteButtonText}>🗑️ Sil</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
+            )}
+          </View>
+          )}
 
           <View style={styles.bottomPadding} />
         </ScrollView>
@@ -448,6 +607,125 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  cancelButton: {
+    backgroundColor: '#F44336',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  cancelButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    marginHorizontal: 15,
+    marginBottom: 15,
+    borderRadius: 10,
+    padding: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  tabActive: {
+    backgroundColor: '#673AB7',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '600',
+  },
+  tabTextActive: {
+    color: '#FFFFFF',
+  },
+  foodItem: {
+    backgroundColor: '#F5F5F5',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#673AB7',
+  },
+  foodItemHeader: {
+    marginBottom: 8,
+  },
+  foodItemName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  foodItemCategory: {
+    fontSize: 12,
+    color: '#666',
+  },
+  foodItemDetails: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+  foodItemDetail: {
+    fontSize: 13,
+    color: '#555',
+    marginRight: 15,
+  },
+  foodItemActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+  },
+  editButton: {
+    backgroundColor: '#2196F3',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  editButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  deleteButton: {
+    backgroundColor: '#F44336',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: '#999',
+    marginBottom: 15,
+  },
+  addFirstButton: {
+    backgroundColor: '#673AB7',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  addFirstButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
   },
   bottomPadding: {
     height: 30,
